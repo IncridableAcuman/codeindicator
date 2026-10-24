@@ -1,15 +1,36 @@
 import { ArrowRight, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+  const navItems = [
+    { label: "Home", href: "#home",id:"home" },
+    { label: "About", href: "#about",id:"about" },
+    { label: "Skills", href: "#skills",id:"skills" },
+    { label: "Services", href: "#services",id:"skills" },
+    { label: "Contact", href: "#contact",id:"skills" },
+  ];
+
 
 const Navbar = () => {
   const [menu, setMenu] = useState(false);
-  const navItems = [
-    { label: "Home", href: "#home" },
-    { label: "About", href: "#about" },
-    { label: "Skills", href: "#skills" },
-    { label: "Services", href: "#services" },
-    { label: "Contact", href: "#contact" },
-  ];
+  const [active,setActive]=useState("#home");
+
+  useEffect(()=>{
+    const sections = navItems
+    .map((nav)=>document.getElementById(nav.href.slice(1)))
+    .filter(Boolean);
+
+    const observer = new IntersectionObserver(
+      (entries)=>{
+        entries.forEach((entry)=>{
+          if(entry.isIntersecting) setActive(`#${entry.target.id}`)
+        });
+      },
+      {rootMargin: "-50% 0px -50% 0px"}
+    );
+    sections.forEach((section)=>observer.observe(section));
+    return ()=> observer.disconnect();
+
+  },[])
 
   return (
     <header className="sticky top-4 z-50 mx-auto max-w-5xl px-4 sm:px-6">
@@ -26,6 +47,9 @@ const Navbar = () => {
               <li key={nav.href}>
                 <a
                   href={nav.href}
+                  onClick={()=>setActive(nav.href)}
+                  id={nav.id}
+                  aria-current={active ? "page" : undefined}
                   className="text-slate-400 hover:text-blue-400
                          hover:underline hover:underline-offset-8 transition-colors duration-200 focus-visible:outline"
                 >
@@ -70,7 +94,11 @@ const Navbar = () => {
               <li key={nav.href} className="w-full text-center space-y-4 p-4">
                 <a
                   href={nav.href}
-                  onClick={() => setMenu(false)}
+                  onClick={() => {
+                    setMenu(false)
+                    setActive(nav.href)
+                  }}
+                  id={nav.id}
                   className="text-slate-400 hover:text-blue-400 font-medium hover:underline hover:underline-offset-8 transition-colors"
                 >
                   {nav.label}
